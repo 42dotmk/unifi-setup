@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  unifi-network-application:
+    image: lscr.io/linuxserver/unifi-network-application:8.0.26
+    container_name: unifi-network-application
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASS: ${MONGO_PASS}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_DBNAME: ${MONGO_DBNAME}
+      MEM_LIMIT: ${MEM_LIMIT}
+      MEM_STARTUP: ${MEM_STARTUP}
+      MONGO_TLS: ${MONGO_TLS}
+      MONGO_AUTHSOURCE: ${MONGO_AUTHSOURCE}
+    ports:
+      - "8443:8443"
+      - "3478:3478/udp"
+      - "10001:10001/udp"
+      - "8080:8080"
+      - "1900:1900/udp" # optional
+      - "8843:8843" # optional
+      - "8880:8880" # optional
+      - "6789:6789" # optional
+      - "5514:5514/udp" # optional
+    volumes:
+      - unifi-config:/config
+  mongo:
+    image: mongo:4.4
+    command: [--auth]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo-data:/data/db
+      - ./init.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+volumes:
+  unifi-config:
+  mongo-data:
